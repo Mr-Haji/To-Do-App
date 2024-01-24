@@ -1,10 +1,8 @@
-import React from "react";
+import react, { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -12,10 +10,10 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { AUTH } from "../../Config/FireBase/FireBase";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { AUTH } from "../../Config/FireBase/FireBase";
+import { NavLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Copyright(props) {
   return (
@@ -39,27 +37,65 @@ function Copyright(props) {
 
 const defaultTheme = createTheme();
 
-export default function LogIn() {
-  const Navigate = useNavigate();
-  const [email, setemail] = useState("");
-  const [password, setpassword] = useState("");
-  console.log(email, password);
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+export default function SignUp() {
+  const [email, setemail] = useState();
+  const [password, setpassword] = useState();
+  const [firstName, setfirstName] = useState();
+  const [lastName, setlastName] = useState();
 
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
     try {
-      await signInWithEmailAndPassword(AUTH, email, password)
-        .then((userCredential) => {
-          console.log(userCredential.user.uid);
-          Navigate("/todo");
+      event.preventDefault();
+      console.log(email, password, firstName, lastName);
+
+      if (!email || !password || !firstName || !lastName) {
+        toast.error("required fields are missing!", {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          //   transition: Bounce,
+        });
+        return;
+      }
+
+      signInWithEmailAndPassword(AUTH, email, password)
+        .then(async (userCredential) => {
+          console.log("userCredential", userCredential);
+          console.log("userCredential", userCredential.user.uid);
+
+          navigate("/home");
         })
         .catch((error) => {
-          console.log(error.code);
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // ..
+          toast.error(error.message, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          });
         });
-    } catch (error) {}
+    } catch (error) {
+      toast.error(error.message, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
   };
 
   return (
@@ -78,7 +114,7 @@ export default function LogIn() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Log In
+            Log In{" "}
           </Typography>
           <Box
             component="form"
@@ -87,6 +123,29 @@ export default function LogIn() {
             sx={{ mt: 3 }}
           >
             <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  autoComplete="given-name"
+                  name="firstName"
+                  required
+                  fullWidth
+                  id="firstName"
+                  label="First Name"
+                  autoFocus
+                  onChange={(e) => setfirstName(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id="lastName"
+                  label="Last Name"
+                  name="lastName"
+                  autoComplete="family-name"
+                  onChange={(e) => setlastName(e.target.value)}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <TextField
                   required
@@ -117,13 +176,13 @@ export default function LogIn() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Log In
+              Sign Up
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
-                  Already have an account? Sign in
-                </Link>
+                <NavLink to="/signUp" variant="body2">
+                  Don't have an account? Sign Up
+                </NavLink>
               </Grid>
             </Grid>
           </Box>

@@ -3,8 +3,6 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -15,7 +13,13 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { AUTH } from "../../Config/FireBase/FireBase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  GithubAuthProvider,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth";
+import { toast } from "react-toastify";
 
 function Copyright(props) {
   return (
@@ -34,49 +38,88 @@ function Copyright(props) {
     </Typography>
   );
 }
-
-// TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
 
 export default function SignUp() {
   const Navigate = useNavigate();
   const [firstName, setfirstName] = useState("");
-
   const [lastName, setlastName] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
   // console.log(firstName, lastName, email, password);
-  const handleSubmit = async (event) => {
-    event.preventDefault();
 
+  //singUp_with_email
+  const emailpasswordSignUpHandeler = async () => {
+    console.log(" Check Done emailSignUpHandeler");
     try {
       await createUserWithEmailAndPassword(AUTH, email, password)
         .then((userCredential) => {
           console.log(userCredential.user.uid);
           localStorage.setItem("User", userCredential.user.uid);
-          toast.success("🦄 Wow so easy!", {
+          toast.success('🦄 Wow so easy!', {
             position: "top-center",
             autoClose: 5000,
             hideProgressBar: false,
             closeOnClick: true,
-            pauseOnHover: true,
+             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            theme: "colored",
-            transition: Bounce,
-          });
-
+            theme: "dark",
+            
+            });
           Navigate("/todo");
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          // ..
+          console.log("emailPassword==>", errorMessage);
         });
     } catch (error) {}
   };
-
+  //singUp_with_google
+  const googleSignUpHandeler = async () => {
+    // console.log("Check Done googleSignUpHandeler");
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(AUTH, provider)
+        .then((result) => {
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken;
+          const user = result.user;
+          Navigate("/toDo");
+          console.log("user==>", user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          const email = error.customData.email;
+          const credential = GoogleAuthProvider.credentialFromError(error);
+          console.log("google==>", errorMessage);
+        });
+    } catch (error) {}
+  };
+  //singUp_with_gitHub
+  const gitHubSignUpHandeler = async () => {
+    try {
+      const provider = new GithubAuthProvider();
+      await signInWithPopup(AUTH, provider)
+        .then((result) => {
+          const credential = GithubAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken;
+          const user = result.user;
+          Navigate("/toDo");
+          console.log("user==>", user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          const email = error.customData.email;
+          const credential = GithubAuthProvider.credentialFromError(error);
+          console.log("gitHub==>", errorMessage);
+        });
+    } catch (error) {}
+    // console.log("Check DOne gitHubSignUpHandeler");
+  };
   return (
     <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
@@ -95,12 +138,7 @@ export default function SignUp() {
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
-          <Box
-            component="form"
-            noValidate
-            onSubmit={handleSubmit}
-            sx={{ mt: 3 }}
-          >
+          <Box noValidate sx={{ mt: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -150,23 +188,38 @@ export default function SignUp() {
               </Grid>
             </Grid>
             <Button
-              type="submit"
+              onClick={emailpasswordSignUpHandeler}
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
               Sign Up
             </Button>
+            <Button
+              onClick={googleSignUpHandeler}
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Google
+            </Button>
+            <Button
+              onClick={gitHubSignUpHandeler}
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Git Hub
+            </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link to={"/login"} variant="body2">
+                <NavLink to="/" variant="body2">
                   Already have an account? Sign in
-                </Link>
+                </NavLink>
               </Grid>
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
       </Container>
     </ThemeProvider>
   );

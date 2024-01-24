@@ -7,11 +7,11 @@ import Error from '../Screens/Error/Error'
 
 const RouteList = [
     {
-        path: "/",
+        path: "/signUp",
         element: <SignUp />
     },
     {
-        path: "/login",
+        path: "/",
         element: <LogIn />
     },
     {

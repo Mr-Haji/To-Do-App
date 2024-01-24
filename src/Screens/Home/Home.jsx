@@ -16,8 +16,8 @@ import { getAuth } from "firebase/auth";
 
 const Home = () => {
   // const auth = getAuth()
-  // console.log(auth) 
-    const Navigate = useNavigate();
+  // console.log(auth)
+  const Navigate = useNavigate();
   const [addToDoHandeler, SetaddToDoHandeler] = useState("");
   const [getUserData, setgetUserData] = useState([]);
   const [refresh, setrefresh] = useState(true);
@@ -32,6 +32,7 @@ const Home = () => {
       const toDoRef = await addDoc(collection(DB, "ToDo's"), allToDo);
       // console.log(toDoRef, "Send toDoRef");
       setrefresh(!refresh);
+      SetaddToDoHandeler("");
     } catch (error) {
       console.log("error", error);
     }
@@ -107,6 +108,7 @@ const Home = () => {
         >
           <Input
             onChange={(e) => SetaddToDoHandeler(e.target.value)}
+            value={addToDoHandeler}
             placeholder="Enter To Do"
             sx={{
               padding: "15px",
